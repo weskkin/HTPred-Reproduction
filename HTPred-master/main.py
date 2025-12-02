@@ -10,6 +10,7 @@ import getfunctionalfeatures as funf
 import string_processing as sp
 import features_extractor as f1
 import HTPredBenchCreator
+import structural_features_extractor as f2
 
 '''(Non Trojan = 0, Trojan = 1)'''
 
@@ -202,5 +203,29 @@ def main_function(file_location_input, name_of_file, trojan_notrojan):
         print("No structural primitive keys found (empty structural_data).")
 
     print("---------- BenchToFeature Done -----------\n")
+
+    # === Step 6 - Structural expansion (convert primitive BenchToFeature -> expanded structural features) ===
+
+    print("---------- Starting structural_features_extractor.extract_sf (expansion) -----------")
+
+    # Expand primitives into the structural feature vector
+    new_list = f2.extract_sf(structural_data)
+
+    print("---------- structural_features_extractor Done -----------")
+
+    # Sanity checks / quick previews
+    print("Structural feature vector length:", len(new_list))
+    # Small previews
+    print("Preview (first 20 structural features):", new_list[:20])
+    print("Preview (last 10 structural features):", new_list[-10:])
+
+    # Append structural features to list_of_features (to keep pipeline consistent)
+    try:
+        list_of_features.extend(new_list)
+        print("Structural features appended to list_of_features. Total features now:", len(list_of_features))
+    except NameError:
+        # if list_of_features doesn't exist (you may be running BenchToFeature-only run), just report
+        print("Note: list_of_features not found in scope; structural features computed but not appended.")
+    print("---------- Step 6 complete -----------\n")
 
 main_function(file_location_input, name_of_file, trojan_nontrojan)
