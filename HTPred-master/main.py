@@ -3,6 +3,8 @@ from os.path import isfile, join
 from enum import Enum
 import sys
 import os
+import csv
+from collections import defaultdict
 
 import getfunctionalfeatures as funf
 import string_processing as sp
@@ -13,6 +15,28 @@ file_location_input = 'test_small.bench.txt'
 name_of_file = 'test_small.bench.bench'
 trojan_nontrojan = 1
 
+def get_raw_list_features(name_of_file):
+
+    columns = defaultdict(list)  # each value in each column is appended to a list
+
+    with open(name_of_file) as f:
+        reader = csv.DictReader(f)  # read rows into a dictionary format
+        for row in reader:  # read a row as {column1: value1, column2: value2,...}
+            for (k, v) in row.items():
+                if(k=="Wire"):
+                    continue
+                columns[k].append(float(v))  # append the value into the appropriate list
+                # based on column name k
+
+    super_list = []
+
+    super_list.append(columns['Controllability0'])
+    super_list.append(columns['Controllability1'])
+    super_list.append(columns['Observability'])
+    super_list.append(columns['Prob0'])
+    super_list.append(columns['Prob1'])
+
+    return super_list
 
 def main_function(file_location_input, name_of_file, trojan_notrojan):
 
@@ -53,5 +77,60 @@ def main_function(file_location_input, name_of_file, trojan_notrojan):
     print("gate_list_output:", gate_list_output)
     print("gate_list_name:", gate_list_name)
     print("-----------------------------------------------")
+
+    # Step 3 - Get Raw List Features
+    print("---------- Starting Getting Raw List Features -----------")
+
+    if(trojan_notrojan=="0"): # Non Trojan
+        path = "../functional_results_non_trojan/"
+    else:
+        path = "../functional_results_trojan/"
+
+    files = os.listdir(path)
+    raw_feature_list = []
+    for f in files:
+        if(name_of_file in f):
+            new_path = join(path, f)
+            raw_feature_list = get_raw_list_features(new_path)
+            break
+
+    if(raw_feature_list == []):
+        raise Exception('File Functional Feature not found ! ')
+
+    CC0_list = raw_feature_list[0]
+    CC1_list = raw_feature_list[1]
+    CO_list = raw_feature_list[2]
+    P0_list = raw_feature_list[3]
+    P1_list = raw_feature_list[4]
+
+    print("---------- Getting Raw List Features Done -----------")
+    
+    print("\n---------- RAW FUNCTIONAL FEATURES OUTPUT -----------")
+
+    print(f"Matched functional CSV file: {new_path}\n")
+
+    print(f"Number of wires detected in functional features: {len(CC0_list)}")
+
+    print("\n--- Controllability 0 (CC0) ---")
+    print("First 10 values:", CC0_list[:10])
+    print("Min:", min(CC0_list), "Max:", max(CC0_list))
+
+    print("\n--- Controllability 1 (CC1) ---")
+    print("First 10 values:", CC1_list[:10])
+    print("Min:", min(CC1_list), "Max:", max(CC1_list))
+
+    print("\n--- Observability (CO) ---")
+    print("First 10 values:", CO_list[:10])
+    print("Min:", min(CO_list), "Max:", max(CO_list))
+
+    print("\n--- Probability 0 (P0) ---")
+    print("First 10 values:", P0_list[:10])
+    print("Min:", min(P0_list), "Max:", max(P0_list))
+
+    print("\n--- Probability 1 (P1) ---")
+    print("First 10 values:", P1_list[:10])
+    print("Min:", min(P1_list), "Max:", max(P1_list))
+
+    print("----------------------------------------------------\n")
 
 main_function(file_location_input, name_of_file, trojan_nontrojan)
