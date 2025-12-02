@@ -9,6 +9,7 @@ from collections import defaultdict
 import getfunctionalfeatures as funf
 import string_processing as sp
 import features_extractor as f1
+import HTPredBenchCreator
 
 '''(Non Trojan = 0, Trojan = 1)'''
 
@@ -38,6 +39,11 @@ def get_raw_list_features(name_of_file):
     super_list.append(columns['Prob1'])
 
     return super_list
+
+def get_feature_data(input_file):
+    r = HTPredBenchCreator.BenchToFeature(input_file)
+    final_data = r.getfeatures()
+    return final_data
 
 def main_function(file_location_input, name_of_file, trojan_notrojan):
 
@@ -168,5 +174,33 @@ def main_function(file_location_input, name_of_file, trojan_notrojan):
     print(list_of_features)
 
     print("--------------------------------------------------------------\n")
+
+    # Step 5 - Structural features
+
+    print("---------- Starting Structural Features (BenchToFeature) -----------")
+
+    # get per-wire primitive structural data (dict: feature_name -> {wire_name: value_or_list})
+    structural_data = get_feature_data(file_location_input)
+
+    print("---------- BenchToFeature OUTPUT (primitives) -----------")
+    keys = list(structural_data.keys())
+    print("Primitive structural keys (features):", keys)
+    # find number of wires by checking any key's dict length
+    if keys:
+        example_key = keys[0]
+        wire_names = list(structural_data[example_key].keys())
+        print("Number of wires in structural output:", len(wire_names))
+        print("\nSample per-wire primitive values (first 8 wires):")
+        sample_wires = wire_names[:8]
+        for w in sample_wires:
+            # collect the value/list for each primitive key for this wire
+            vals = []
+            for k in keys:
+                vals.append(structural_data[k].get(w))
+            print(f"{w} ->", vals)
+    else:
+        print("No structural primitive keys found (empty structural_data).")
+
+    print("---------- BenchToFeature Done -----------\n")
 
 main_function(file_location_input, name_of_file, trojan_nontrojan)
