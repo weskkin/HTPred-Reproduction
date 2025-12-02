@@ -8,12 +8,13 @@ from collections import defaultdict
 
 import getfunctionalfeatures as funf
 import string_processing as sp
+import features_extractor as f1
 
 '''(Non Trojan = 0, Trojan = 1)'''
 
-file_location_input = 'test_small.bench.txt'
-name_of_file = 'test_small.bench.bench'
-trojan_nontrojan = 1
+file_location_input = 'medium_test.bench.txt'
+name_of_file = 'medium_test.bench.bench'
+trojan_nontrojan = 0
 
 def get_raw_list_features(name_of_file):
 
@@ -64,6 +65,7 @@ def main_function(file_location_input, name_of_file, trojan_notrojan):
      gate_list_name) = sp.StringProcessing(file_location_input)
      
     end_time = time.time()
+    time_elapsed = end_time - start_time
     print("---------- String processing Done -----------")
 
     print("\n---------- String Processing OUTPUT -----------")
@@ -104,7 +106,7 @@ def main_function(file_location_input, name_of_file, trojan_notrojan):
     P1_list = raw_feature_list[4]
 
     print("---------- Getting Raw List Features Done -----------")
-    
+
     print("\n---------- RAW FUNCTIONAL FEATURES OUTPUT -----------")
 
     print(f"Matched functional CSV file: {new_path}\n")
@@ -132,5 +134,39 @@ def main_function(file_location_input, name_of_file, trojan_notrojan):
     print("Min:", min(P1_list), "Max:", max(P1_list))
 
     print("----------------------------------------------------\n")
+
+    # Step 4 - Extract Features
+    print("---------- Starting Features Extraction -----------")
+    list_of_features = f1.FeatureExtractor(final_primary_inputs_list,
+                                            final_primary_outputs_list, 
+                                            final_gates_list,
+                                            gate_list_input,
+                                            gate_list_output,
+                                            gate_list_name,
+                                            time_elapsed,
+                                            name_of_file,
+                                            CC0_list,
+                                            CC1_list,
+                                            CO_list,
+                                            P0_list,
+                                            P1_list)
+    print("---------- Features Extraction Done -----------")
+
+    print("\n---------- FEATURE EXTRACTOR OUTPUT (246 features) -----------")
+    print(f"Number of features returned: {len(list_of_features)}")
+
+    # Print first 20 features for preview
+    # print("\nFirst 20 features:")
+    # print(list_of_features[:20])
+
+    # # Print last 10 features for preview
+    # print("\nLast 10 features:")
+    # print(list_of_features[-10:])
+
+    # FULL PRINT (optional – uncomment if you want everything)
+    print("\nFull feature list:")
+    print(list_of_features)
+
+    print("--------------------------------------------------------------\n")
 
 main_function(file_location_input, name_of_file, trojan_nontrojan)
