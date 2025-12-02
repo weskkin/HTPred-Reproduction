@@ -227,7 +227,6 @@ def main_function(file_location_input, name_of_file, trojan_notrojan):
     except NameError:
         # if list_of_features doesn't exist (you may be running BenchToFeature-only run), just report
         print("Note: list_of_features not found in scope; structural features computed but not appended.")
-    print("---------- Step 6 complete -----------\n")
 
     # Step 7 - L-features (from CO list)
     print("---------- Starting L-features extraction (lfeaturesextractor.getLfeatures) -----------")
@@ -247,6 +246,17 @@ def main_function(file_location_input, name_of_file, trojan_notrojan):
     except NameError:
         print("Note: list_of_features not in scope; L-features computed but not appended.")
 
-    print("---------- Step 7 complete -----------\n")
+    # Step 8 - Append label (trojan / non-trojan)
+    print("---------- Starting label append -----------")
+    try:
+        label_value = trojan_notrojan
+        try:
+            list_of_features.append(label_value)
+            print("Label appended to feature vector:", label_value)
+            print("Final feature vector length (after label):", len(list_of_features))
+        except NameError:
+            print("Note: list_of_features not in scope; label computed but not appended.")
+    except Exception as e:
+        print("[ERROR] Failed to append label:", e)
 
 main_function(file_location_input, name_of_file, trojan_nontrojan)
