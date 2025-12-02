@@ -11,6 +11,7 @@ import string_processing as sp
 import features_extractor as f1
 import HTPredBenchCreator
 import structural_features_extractor as f2
+import lfeaturesextractor
 
 '''(Non Trojan = 0, Trojan = 1)'''
 
@@ -204,7 +205,7 @@ def main_function(file_location_input, name_of_file, trojan_notrojan):
 
     print("---------- BenchToFeature Done -----------\n")
 
-    # === Step 6 - Structural expansion (convert primitive BenchToFeature -> expanded structural features) ===
+    # Step 6 - Structural expansion (convert primitive BenchToFeature -> expanded structural features) ===
 
     print("---------- Starting structural_features_extractor.extract_sf (expansion) -----------")
 
@@ -227,5 +228,25 @@ def main_function(file_location_input, name_of_file, trojan_notrojan):
         # if list_of_features doesn't exist (you may be running BenchToFeature-only run), just report
         print("Note: list_of_features not found in scope; structural features computed but not appended.")
     print("---------- Step 6 complete -----------\n")
+
+    # Step 7 - L-features (from CO list)
+    print("---------- Starting L-features extraction (lfeaturesextractor.getLfeatures) -----------")
+    try:
+        Lfeatures = lfeaturesextractor.getLfeatures(CO_list)
+        print("---------- L-features extraction Done -----------")
+        print("Number of L-features returned:", len(Lfeatures))
+        print("Preview L-features (first 10):", Lfeatures[:10])
+    except Exception as e:
+        print("[ERROR] Failed to compute L-features:", e)
+        Lfeatures = []
+
+    # Append L-features to feature vector (if list_of_features exists)
+    try:
+        list_of_features.extend(Lfeatures)
+        print("L-features appended. Total features now:", len(list_of_features))
+    except NameError:
+        print("Note: list_of_features not in scope; L-features computed but not appended.")
+
+    print("---------- Step 7 complete -----------\n")
 
 main_function(file_location_input, name_of_file, trojan_nontrojan)
