@@ -17,7 +17,6 @@ import headers_list as hl
 
 '''(Non Trojan = 0, Trojan = 1)'''
 
-
 file_location_input = 's35932_T000_bench.txt'
 name_of_file = 's35932_T000_bench.bench'
 
