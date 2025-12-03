@@ -12,6 +12,8 @@ import features_extractor as f1
 import HTPredBenchCreator
 import structural_features_extractor as f2
 import lfeaturesextractor
+import csv_append as ca
+import headers_list as hl
 
 '''(Non Trojan = 0, Trojan = 1)'''
 
@@ -46,6 +48,64 @@ def get_feature_data(input_file):
     r = HTPredBenchCreator.BenchToFeature(input_file)
     final_data = r.getfeatures()
     return final_data
+
+def ensure_headers_and_append(csv_path, header_list, feature_row, force_write_headers=False):
+    """
+    Ensure header row exists in csv_path (write if missing/empty).
+    Then append feature_row using csv_append.Append().
+    If file exists and header differs, prints a warning. If force_write_headers=True it will overwrite header.
+    """
+    write_headers = False
+
+    # decide whether to write headers
+    if not os.path.exists(csv_path):
+        print(f"[INFO] CSV '{csv_path}' does not exist. Will create and write headers.")
+        write_headers = True
+    else:
+        try:
+            if os.stat(csv_path).st_size == 0:
+                print(f"[INFO] CSV '{csv_path}' exists but is empty. Will write headers.")
+                write_headers = True
+            else:
+                # read first row to compare
+                with open(csv_path, 'r', newline='') as fh:
+                    reader = csv.reader(fh)
+                    try:
+                        existing_header = next(reader)
+                    except StopIteration:
+                        existing_header = []
+                # if header differs, warn (or force rewrite if requested)
+                if existing_header != [str(h) for h in header_list]:
+                    msg = (f"[WARN] Existing CSV header differs from expected header. "
+                           f"Existing cols: {len(existing_header)}, Expected cols: {len(header_list)}.")
+                    print(msg)
+                    if force_write_headers:
+                        print("[INFO] force_write_headers=True — rewriting header (will overwrite first row).")
+                        write_headers = True
+                    else:
+                        print("[INFO] Not rewriting header. Appending row anyway (be careful about column mismatch).")
+        except Exception as e:
+            print("[WARN] Could not inspect existing CSV header:", e)
+            # fall back to writing headers to be safe
+            write_headers = True
+
+    # write header if needed
+    if write_headers:
+        try:
+            with open(csv_path, 'w', newline='') as fh:
+                writer = csv.writer(fh)
+                writer.writerow(header_list)
+            print(f"[OK] Wrote header to '{csv_path}' ({len(header_list)} columns).")
+        except Exception as e:
+            print("[ERROR] Failed to write header:", e)
+            return
+
+    # append the feature row using your csv_append module
+    try:
+        ca.Append(csv_path, header_list, feature_row)
+        print(f"[OK] Appended feature row to '{csv_path}'.")
+    except Exception as e:
+        print("[ERROR] Failed to append feature row via csv_append.Append:", e)
 
 def main_function(file_location_input, name_of_file, trojan_notrojan):
 
@@ -262,8 +322,7 @@ def main_function(file_location_input, name_of_file, trojan_notrojan):
     # Final sanity checks
     print("---------- Final checks before append -----------")
     try:
-        import headers_list
-        header_list = headers_list.Headers()
+        header_list = hl.Headers()
         print("Header count:", len(header_list))
         # list_of_features may not exist if you ran only BenchToFeature; guard it
         if 'list_of_features' in locals():
@@ -277,5 +336,16 @@ def main_function(file_location_input, name_of_file, trojan_notrojan):
             print("Note: list_of_features not available in locals(); cannot compare header vs features.")
     except Exception as e:
         print("[WARN] Could not load headers_list to compare lengths:", e)
+        header_list = None
+
+    # Only proceed if header_list is available and list_of_features exists
+    if header_list is not None and 'list_of_features' in locals():
+        csv_path = 'data.csv'   # change path here if you want a different file
+        # If you want to force rewrite header when it mismatches, pass force_write_headers=True
+        ensure_headers_and_append(csv_path, header_list, list_of_features, force_write_headers=False)
+    else:
+        print("[INFO] Skipping CSV write: header_list or list_of_features not available.")
+
+    
 
 main_function(file_location_input, name_of_file, trojan_nontrojan)
