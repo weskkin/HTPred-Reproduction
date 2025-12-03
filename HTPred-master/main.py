@@ -259,4 +259,23 @@ def main_function(file_location_input, name_of_file, trojan_notrojan):
     except Exception as e:
         print("[ERROR] Failed to append label:", e)
 
+    # Final sanity checks
+    print("---------- Final checks before append -----------")
+    try:
+        import headers_list
+        header_list = headers_list.Headers()
+        print("Header count:", len(header_list))
+        # list_of_features may not exist if you ran only BenchToFeature; guard it
+        if 'list_of_features' in locals():
+            print("Feature vector length:", len(list_of_features))
+            if len(header_list) != len(list_of_features):
+                print(f"[WARN] header length ({len(header_list)}) != feature vector length ({len(list_of_features)}).")
+                print("Mismatch = ", len(list_of_features) - len(header_list))
+            else:
+                print("[OK] header and feature-vector length match. Ready to append to CSV.")
+        else:
+            print("Note: list_of_features not available in locals(); cannot compare header vs features.")
+    except Exception as e:
+        print("[WARN] Could not load headers_list to compare lengths:", e)
+
 main_function(file_location_input, name_of_file, trojan_nontrojan)
