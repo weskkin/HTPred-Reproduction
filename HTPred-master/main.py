@@ -17,9 +17,11 @@ import headers_list as hl
 
 '''(Non Trojan = 0, Trojan = 1)'''
 
-file_location_input = 'medium_test.bench.txt'
-name_of_file = 'medium_test.bench.bench'
-trojan_nontrojan = 0
+
+file_location_input = 's35932_T000_bench.txt'
+name_of_file = 's35932_T000_bench.bench'
+
+trojan_nontrojan = 1
 
 def get_raw_list_features(name_of_file):
 
