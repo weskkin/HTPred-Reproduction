@@ -1,4 +1,5 @@
 import bench_session
+from collections import deque
 
 FLIP_FLOP = ['DFF']
 MUX = ['MUX']
@@ -372,14 +373,14 @@ class feature_extractor:
                 starting_nets.append(pin.get_connected_wire())
         visited = set()
 
-        q = []
+        q = deque()
         for net in starting_nets:
             if net is not None:
                 visited.add(net)
                 q.append([net,1])
 
         while len(q) != 0:
-            popped_net = q.pop(0)
+            popped_net = q.popleft()
 
             for t in popped_net[0].get_out():
                 parent_gate = t.get_parent_gate()
@@ -435,14 +436,14 @@ class feature_extractor:
                 starting_nets.append(pin.get_connected_wire())
         visited = set()
 
-        q = []
+        q = deque()
         for net in starting_nets:
             if net is not None:
                 visited.add(net)
                 q.append([net, 1])
 
         while len(q) != 0:
-            popped_net = q.pop(0)
+            popped_net = q.popleft()
 
             for t in popped_net[0].get_in():
                 parent_gate = t.get_parent_gate()

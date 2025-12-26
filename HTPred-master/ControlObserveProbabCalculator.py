@@ -3,6 +3,7 @@ import csv
 import ProbFormula
 import enum
 import uuid
+from collections import deque
 
 FLIPFLOP = {"DFF"}
 uninvoked = set()
@@ -366,7 +367,7 @@ class Module:
         self.__inputpins["GND"] = set()
 
         self.flipflops = set()
-        self.gates_to_invoke = []
+        self.gates_to_invoke = deque()
         self.max_version = 99999999999
         self.gates_to_invoke_exclusion = set()
 
@@ -568,7 +569,7 @@ class COPCalculator:
 
         self.__assign_c_input_pin()
         while len(self.m.gates_to_invoke) != 0:
-            gate = self.m.gates_to_invoke.pop(0)
+            gate = self.m.gates_to_invoke.popleft()
             gate.invokeInput_to_Output(self.m.circuit_type)
         self.__clear_invoke_gates()
 
@@ -576,7 +577,7 @@ class COPCalculator:
 
         self.__assign_o_output_pin()
         while len(self.m.gates_to_invoke) != 0:
-            gate = self.m.gates_to_invoke.pop(0)
+            gate = self.m.gates_to_invoke.popleft()
             gate.invokeOutput_to_Input(self.m.circuit_type)
         self.__clear_invoke_gates()
 
@@ -585,7 +586,7 @@ class COPCalculator:
 
         self.__assign_prob_input_pin()
         while len(self.m.gates_to_invoke) != 0:
-            gate = self.m.gates_to_invoke.pop(0)
+            gate = self.m.gates_to_invoke.popleft()
             gate.invokeProbInput_to_Output()
         self.__clear_invoke_gates()
 

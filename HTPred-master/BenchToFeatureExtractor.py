@@ -1,6 +1,7 @@
 import uuid
 import enum
 import csv
+from collections import deque
 
 FLIPFLOP = {"DFF"}
 NEAREST_HARD_LIMIT = 100
@@ -337,9 +338,10 @@ class BenchToFeature:
             for conn_wire in gate_outp_pins.connected_wires.keys():
                 wireStack.append((gate_outp_pins.connected_wires[conn_wire],1))
 
+        wireStack = deque(wireStack)
         addedwires = set()
         while len(wireStack) > 0:
-            temp = wireStack.pop(0)
+            temp = wireStack.popleft()
             currentwire = temp[0]
             it = temp[1]
 
@@ -382,9 +384,10 @@ class BenchToFeature:
             for conn_wire in gate_inp_pins.connected_wires.keys():
                 wireStack.append((gate_inp_pins.connected_wires[conn_wire], 1))
 
+        wireStack = deque(wireStack)
         addedwires = set()
         while len(wireStack) > 0:
-            temp = wireStack.pop(0)
+            temp = wireStack.popleft()
             currentwire = temp[0]
             it = temp[1]
 
@@ -466,11 +469,11 @@ class BenchToFeature:
 
     def __recinnearff(self, wire: Wire):
 
-        wireStack = [(wire,0)]
+        wireStack = deque([(wire,0)])
         addedwires = {wire}
 
         while len(wireStack) > 0:
-            temp = wireStack.pop(0)
+            temp = wireStack.popleft()
             currentwire = temp[0]
             it = temp[1]
 
@@ -503,11 +506,11 @@ class BenchToFeature:
 
     def __recoutnearff(self, wire: Wire):
 
-        wireStack = [(wire, 0)]
+        wireStack = deque([(wire, 0)])
         addedwires = {wire}
 
         while len(wireStack) > 0:
-            temp = wireStack.pop(0)
+            temp = wireStack.popleft()
             currentwire = temp[0]
             it = temp[1]
 
